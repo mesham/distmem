@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
 	struct distmem_gaspi_memory_information * alloc_info=distmem_gaspi_get_info(GASPI_CONTIGUOUS_KIND, buffer);
 	printf("[Contiguous mem] Total number elements=%zu, distributed over %d procs, local number elements=%zu\n", alloc_info->total_number_elements,
 			alloc_info->procs_distributed_over, alloc_info->number_local_elements);
+	memkind_free(GASPI_CONTIGUOUS_KIND, buffer);
 
 	// Now create a GASPI segment and create memory kind that represents this, managing this as a heap locally & distributed
 	memkind_t GASPI_SEGMENT_KIND;
@@ -39,6 +40,7 @@ int main(int argc, char *argv[]) {
 	alloc_info=distmem_gaspi_get_info(GASPI_SEGMENT_KIND, buffer2);
 	printf("[Segment mem] Total number elements=%zu, distributed over %d procs, local number elements=%zu\n", alloc_info->total_number_elements,
 			alloc_info->procs_distributed_over, alloc_info->number_local_elements);
+	memkind_free(GASPI_SEGMENT_KIND, buffer2);
 	gaspi_proc_term(GASPI_BLOCK);
 	MPI_Finalize();
 	return 0;

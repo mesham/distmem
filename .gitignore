@@ -2,4 +2,4 @@
 .gpi*
 .cproject
 .project
-.so
+*.so
