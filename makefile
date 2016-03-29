@@ -1,5 +1,5 @@
 CC=mpicc
-CFLAGS=-g -fpic -I ../memkind/src -I ../../GPI2-1.2.0/include
+CFLAGS=-g -fpic -I ../memkind_build/include -I ../../GPI2-1.2.0/include
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
