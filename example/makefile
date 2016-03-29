@@ -11,3 +11,6 @@ helloworld_mpi: helloworld_mpi.o
 
 helloworld_gaspi: helloworld_gaspi.o
 	$(CC) -o hello_gaspi helloworld_gaspi.o -ldistmem -lmemkind -L../ -L../../memkind/libs /home/nick/projects/intertwine/GPI2-1.2.0/lib64/libGPI2.a -lpthread
+
+clean:
+	rm -f *.o hello_mpi hello_gaspi
