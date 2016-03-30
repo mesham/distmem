@@ -28,21 +28,18 @@ static void remove_info_entry_from_state(struct distmem *, void *);
 static int get_hashkey(void *);
 static int get_hashkey_from_string(char *);
 static void put_kind_entry_into_kind_state(struct distmem *);
-static void distmem_free(struct memkind *, void *);
 
 void init_distmem() {
-  dist_memory_kinds = (struct dist_intenal_distmem_node **)memkind_malloc(
-      MEMKIND_DEFAULT, sizeof(struct dist_intenal_distmem_node *) * HASH_SIZE);
+  dist_memory_kinds =
+      (struct dist_intenal_distmem_node **)memkind_malloc(MEMKIND_DEFAULT, sizeof(struct dist_intenal_distmem_node *) * HASH_SIZE);
   int i;
   for (i = 0; i < HASH_SIZE; i++) {
     dist_memory_kinds[i] = NULL;
   }
 }
 
-int distmem_create_default(struct distmem_ops *ops, const char *name,
-                           memkind_t *kind) {
-  ops->memkind_operations = (struct memkind_ops *)memkind_malloc(
-      MEMKIND_DEFAULT, sizeof(struct memkind_ops));
+int distmem_create_default(struct distmem_ops *ops, const char *name, memkind_t *kind) {
+  ops->memkind_operations = (struct memkind_ops *)memkind_malloc(MEMKIND_DEFAULT, sizeof(struct memkind_ops));
   ops->memkind_operations->create = memkind_arena_create;
   ops->memkind_operations->destroy = memkind_arena_destroy;
   ops->memkind_operations->malloc = memkind_arena_malloc;
@@ -85,25 +82,20 @@ struct distmem *distmem_get_distkind_by_name(char *name) {
   return NULL;
 }
 
-int distmem_arena_create(struct distmem *dist_kind, struct distmem_ops *ops,
-                         const char *name) {
+int distmem_arena_create(struct distmem *dist_kind, struct distmem_ops *ops, const char *name) {
   int i;
-  dist_kind->internal_state =
-      (struct distmem_memory_information_generic **)memkind_malloc(
-          MEMKIND_DEFAULT,
-          sizeof(struct distmem_memory_information_generic *) * HASH_SIZE);
+  dist_kind->internal_state = (struct distmem_memory_information_generic **)memkind_malloc(
+      MEMKIND_DEFAULT, sizeof(struct distmem_memory_information_generic *) * HASH_SIZE);
   for (i = 0; i < HASH_SIZE; i++) {
     dist_kind->internal_state[i] = NULL;
   }
   return 0;
 }
 
-void distmem_put_specific_entry_into_state(struct distmem *dist_kind,
-                                           void *specific_info, void *ptr) {
+void distmem_put_specific_entry_into_state(struct distmem *dist_kind, void *specific_info, void *ptr) {
   int hashkey = get_hashkey(ptr);
   struct distmem_memory_information_generic *generic_info =
-      (struct distmem_memory_information_generic *)memkind_malloc(
-          MEMKIND_DEFAULT, sizeof(struct distmem_memory_information_generic));
+      (struct distmem_memory_information_generic *)memkind_malloc(MEMKIND_DEFAULT, sizeof(struct distmem_memory_information_generic));
   generic_info->ptr = ptr;
   generic_info->specific_information = specific_info;
   generic_info->next = dist_kind->internal_state[hashkey];
@@ -111,8 +103,7 @@ void distmem_put_specific_entry_into_state(struct distmem *dist_kind,
 }
 
 void *distmem_get_specific_entry(struct distmem *dist_kind, void *ptr) {
-  struct distmem_memory_information_generic *head =
-      dist_kind->internal_state[get_hashkey(ptr)];
+  struct distmem_memory_information_generic *head = dist_kind->internal_state[get_hashkey(ptr)];
   while (head != NULL) {
     if (head->ptr == ptr) return head->specific_information;
     head = head->next;
@@ -122,10 +113,7 @@ void *distmem_get_specific_entry(struct distmem *dist_kind, void *ptr) {
 
 static void remove_info_entry_from_state(struct distmem *dist_kind, void *ptr) {
   int hash_key = get_hashkey(ptr);
-  struct distmem_memory_information_generic *specific_state =
-                                                dist_kind->internal_state
-                                                    [hash_key],
-                                            *last_entry = NULL;
+  struct distmem_memory_information_generic *specific_state = dist_kind->internal_state[hash_key], *last_entry = NULL;
   while (specific_state != NULL) {
     if (specific_state->ptr == ptr) {
       if (last_entry == NULL) {
@@ -133,8 +121,7 @@ static void remove_info_entry_from_state(struct distmem *dist_kind, void *ptr) {
       } else {
         last_entry->next = specific_state->next;
       }
-      if (specific_state->specific_information != NULL)
-        memkind_free(MEMKIND_DEFAULT, specific_state->specific_information);
+      if (specific_state->specific_information != NULL) memkind_free(MEMKIND_DEFAULT, specific_state->specific_information);
       memkind_free(MEMKIND_DEFAULT, specific_state);
       break;
     }
@@ -143,7 +130,7 @@ static void remove_info_entry_from_state(struct distmem *dist_kind, void *ptr) {
   }
 }
 
-static void distmem_free(struct memkind *kind, void *ptr) {
+void distmem_free(struct memkind *kind, void *ptr) {
   remove_info_entry_from_state(distmem_get_distkind_by_name(kind->name), ptr);
   memkind_free(MEMKIND_DEFAULT, ptr);
 }
@@ -151,8 +138,7 @@ static void distmem_free(struct memkind *kind, void *ptr) {
 static void put_kind_entry_into_kind_state(struct distmem *dist_kind) {
   int hash_key = get_hashkey_from_string(dist_kind->name);
   struct dist_intenal_distmem_node *specific_node =
-      (struct dist_intenal_distmem_node *)memkind_malloc(
-          MEMKIND_DEFAULT, sizeof(struct dist_intenal_distmem_node));
+      (struct dist_intenal_distmem_node *)memkind_malloc(MEMKIND_DEFAULT, sizeof(struct dist_intenal_distmem_node));
   specific_node->item = dist_kind;
   specific_node->next = dist_memory_kinds[hash_key];
   dist_memory_kinds[hash_key] = specific_node;

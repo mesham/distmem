@@ -10,11 +10,13 @@
 
 #include "distmem.h"
 #include <memkind.h>
+#include <mpi.h>
 
 struct distmem_mpi_memory_information {
-	int procs_distributed_over;
-	size_t element_size, total_number_elements, number_local_elements;
-	void * local_buffer;
+  int procs_distributed_over;
+  size_t element_size, total_number_elements, number_local_elements, *elements_per_process;
+  void* local_buffer;
+  MPI_Comm communicator;
 };
 
 extern memkind_t MPI_CONTIGUOUS_KIND;
