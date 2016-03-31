@@ -15,6 +15,7 @@ memkind_t MPI_CONTIGUOUS_KIND;
 static struct distmem_ops DISTRIBUTED_MEMORY_VTABLE = {.dist_malloc = distmem_mpi_arena_malloc, .dist_create = distmem_arena_create};
 
 static void put_info_entry_into_state(struct distmem*, void*, int, size_t, size_t, size_t, size_t*, MPI_Comm);
+static void deallocate_specific_information(void*);
 
 void distmem_mpi_init() {
   init_distmem();
@@ -71,5 +72,13 @@ static void put_info_entry_into_state(struct distmem* dist_kind, void* local_buf
   specific_state->procs_distributed_over = procs_distributed_over;
   specific_state->elements_per_process = elements_per_proc;
   specific_state->communicator = communicator;
-  distmem_put_specific_entry_into_state(dist_kind, specific_state, local_buffer);
+  distmem_put_specific_entry_into_state(dist_kind, specific_state, local_buffer, deallocate_specific_information);
+}
+
+static void deallocate_specific_information(void* specific_info) {
+  if (specific_info != NULL) {
+    struct distmem_mpi_memory_information* specific_state = (struct distmem_mpi_memory_information*)specific_info;
+    if (specific_state->elements_per_process != NULL) memkind_free(MEMKIND_DEFAULT, specific_state->elements_per_process);
+    memkind_free(MEMKIND_DEFAULT, specific_state);
+  }
 }

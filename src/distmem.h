@@ -35,6 +35,7 @@ struct distmem_ops {
 
 struct distmem_memory_information_generic {
   void *specific_information, *ptr;
+  void (*deallocate_specific_information)(void *);
   struct distmem_memory_information_generic *next;
 };
 
@@ -44,7 +45,7 @@ void init_distmem();
 int distmem_create(struct distmem_ops *, const char *, memkind_t *);
 int distmem_arena_create(struct distmem *, struct distmem_ops *, const char *name);
 void *distmem_malloc(memkind_t, size_t, size_t, MPI_Comm);
-void distmem_put_specific_entry_into_state(struct distmem *, void *, void *);
+void distmem_put_specific_entry_into_state(struct distmem *, void *, void *, void (*deallocate_specific_information)(void *));
 void *distmem_get_specific_entry(struct distmem *, void *);
 struct distmem *distmem_get_distkind_by_name(char *);
 void distmem_free(struct memkind *, void *);

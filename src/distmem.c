@@ -92,12 +92,14 @@ int distmem_arena_create(struct distmem *dist_kind, struct distmem_ops *ops, con
   return 0;
 }
 
-void distmem_put_specific_entry_into_state(struct distmem *dist_kind, void *specific_info, void *ptr) {
+void distmem_put_specific_entry_into_state(struct distmem *dist_kind, void *specific_info, void *ptr,
+                                           void (*deallocate_specific_information)(void *)) {
   int hashkey = get_hashkey(ptr);
   struct distmem_memory_information_generic *generic_info =
       (struct distmem_memory_information_generic *)memkind_malloc(MEMKIND_DEFAULT, sizeof(struct distmem_memory_information_generic));
   generic_info->ptr = ptr;
   generic_info->specific_information = specific_info;
+  generic_info->deallocate_specific_information = deallocate_specific_information;
   generic_info->next = dist_kind->internal_state[hashkey];
   dist_kind->internal_state[hashkey] = generic_info;
 }
@@ -121,7 +123,13 @@ static void remove_info_entry_from_state(struct distmem *dist_kind, void *ptr) {
       } else {
         last_entry->next = specific_state->next;
       }
-      if (specific_state->specific_information != NULL) memkind_free(MEMKIND_DEFAULT, specific_state->specific_information);
+      if (specific_state->deallocate_specific_information != NULL) {
+        specific_state->deallocate_specific_information(specific_state->specific_information);
+      } else {
+        if (specific_state->specific_information != NULL) {
+          memkind_free(MEMKIND_DEFAULT, specific_state->specific_information);
+        }
+      }
       memkind_free(MEMKIND_DEFAULT, specific_state);
       break;
     }
