@@ -52,9 +52,9 @@ int distmem_create(struct distmem_ops *ops, const char *name, memkind_t *kind) {
     memkind_error_message(err, err_msg, ERROR_MESSAGE_SIZE);
     fprintf(stderr, "%s", err_msg);
   }
-  struct distmem *dist_kind = (struct distmem *)malloc(sizeof(struct distmem));
+  struct distmem *dist_kind = (struct distmem *)memkind_malloc(MEMKIND_DEFAULT, sizeof(struct distmem));
   dist_kind->memkind = *kind;
-  dist_kind->name = (char *)malloc(strlen(name) + 1);
+  dist_kind->name = (char *)memkind_malloc(MEMKIND_DEFAULT, strlen(name) + 1);
   dist_kind->operations = ops;
   strcpy(dist_kind->name, name);
   err = ops->dist_create(dist_kind, ops, name);
