@@ -40,15 +40,8 @@ void init_distmem() {
 
 int distmem_create_default(struct distmem_ops *ops, const char *name, memkind_t *kind) {
   ops->memkind_operations = (struct memkind_ops *)memkind_malloc(MEMKIND_DEFAULT, sizeof(struct memkind_ops));
-  ops->memkind_operations->create = memkind_arena_create;
-  ops->memkind_operations->destroy = memkind_arena_destroy;
-  ops->memkind_operations->malloc = memkind_arena_malloc;
-  ops->memkind_operations->calloc = memkind_arena_calloc;
-  ops->memkind_operations->posix_memalign = memkind_arena_posix_memalign;
-  ops->memkind_operations->realloc = memkind_arena_realloc;
+  memcpy(ops->memkind_operations, &MEMKIND_DEFAULT_OPS, sizeof(struct memkind_ops));
   ops->memkind_operations->free = distmem_free;
-  ops->memkind_operations->get_size = memkind_default_get_size;
-  ops->memkind_operations->get_arena = memkind_thread_get_arena;
   return distmem_create(ops, name, kind);
 }
 

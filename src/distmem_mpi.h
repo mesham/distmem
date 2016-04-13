@@ -10,6 +10,7 @@
 
 #include "distmem.h"
 #include <memkind.h>
+#include <stdarg.h>
 #include <mpi.h>
 
 struct distmem_mpi_memory_information {
@@ -23,7 +24,7 @@ extern memkind_t MPI_CONTIGUOUS_KIND;
 
 void distmem_mpi_init();
 void* distmem_mpi_malloc(memkind_t, size_t, size_t, MPI_Comm);
-void* distmem_mpi_arena_malloc(struct distmem*, size_t, size_t, int, ...);
+struct distmem_block* mpi_contiguous_distribution(int*, struct distmem*, size_t, size_t, int, ...);
 struct distmem_mpi_memory_information* distmem_mpi_get_info(memkind_t, void*);
 
 #endif /* DISTMEM_MPI_H_ */

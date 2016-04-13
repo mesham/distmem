@@ -15,6 +15,10 @@
 
 static int HASH_SIZE = 4993;
 
+struct distmem_block {
+  int startElement, endElement, process;
+};
+
 struct dist_malloc_specific {
   unsigned short id;
   void *specific_information;
@@ -29,8 +33,9 @@ struct distmem {
 
 struct distmem_ops {
   struct memkind_ops *memkind_operations;
-  void *(*dist_malloc)(struct distmem *, size_t, size_t, int, ...);
+  void *(*dist_malloc)(struct distmem *, size_t, size_t, struct distmem_block *, int, int, ...);
   int (*dist_create)(struct distmem *dist_kind, struct distmem_ops *ops, const char *name);
+  struct distmem_block *(*dist_determine_distribution)(int *, struct distmem *, size_t, size_t, int, ...);
 };
 
 struct distmem_memory_information_generic {
