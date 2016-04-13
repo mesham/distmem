@@ -18,10 +18,12 @@ static void deallocate_specific_information(void*);
 
 void distmem_mpi_init() {
   init_distmem();
-  struct distmem_ops DISTRIBUTED_MEMORY_VTABLE = {.dist_malloc = distmem_mpi_arena_malloc,
-                                                  .dist_create = distmem_arena_create,
-                                                  .dist_determine_distribution = mpi_contiguous_distribution};
-  int err = distmem_create_default(&DISTRIBUTED_MEMORY_VTABLE, "mpicontiguous", &MPI_CONTIGUOUS_KIND);
+  struct distmem_ops* distributed_memory_vtable = (struct distmem_ops*)memkind_malloc(MEMKIND_DEFAULT, sizeof(struct distmem_ops));
+  distributed_memory_vtable->dist_malloc = distmem_mpi_arena_malloc;
+  distributed_memory_vtable->dist_create = distmem_arena_create;
+  distributed_memory_vtable->dist_determine_distribution = distmem_mpi_contiguous_distributer;
+
+  int err = distmem_create_default(distributed_memory_vtable, "mpicontiguous", &MPI_CONTIGUOUS_KIND);
   if (err) {
     fprintf(stderr, "Error allocating distributed kind\n");
   }
@@ -58,8 +60,8 @@ static void* distmem_mpi_arena_malloc(struct distmem* dist_kind, size_t element_
   return buffer;
 }
 
-struct distmem_block* mpi_contiguous_distribution(int* numberBlocks, struct distmem* dist_kind, size_t element_size,
-                                                  size_t number_elements, int nargs, ...) {
+struct distmem_block* distmem_mpi_contiguous_distributer(int* numberBlocks, struct distmem* dist_kind, size_t element_size,
+                                                         size_t number_elements, int nargs, ...) {
   va_list ap;
   va_start(ap, nargs);
   MPI_Comm communicator = va_arg(ap, MPI_Comm);
@@ -78,6 +80,7 @@ struct distmem_block* mpi_contiguous_distribution(int* numberBlocks, struct dist
     current_block_start += dimension_division + (i < dimension_extra ? 1 : 0);
     blocks[i].endElement = current_block_start - 1;
   }
+  *numberBlocks = size;
   return blocks;
 }
 
